@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>Untitled</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+Put your HTML text here<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Live Chart with Volatility Market and RSI</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script> <!-- Add annotation plugin -->
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      background-color: #eaf7f8;
+      flex-direction: column;
+      padding: 0 10px;
+    }
+    .chart-container {
+      width: 100%;
+      max-width: 60%; /* Reduce max width to 60% */
+      height: 30vh;   /* Set a smaller height */
+      margin-bottom: 20px;
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+    h1 {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+    }
+    .market-buttons {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+      flex-direction: column;
+      width: 100%;
+    }
+    .market-button-group {
+      display: none;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    .market-buttons button,
+    .market-button-group button {
+      margin: 0 10px;
+      padding: 10px;
+      background-color: #62a4ab;
+      color: white;
+      border: none;
+      cursor: pointer;
+      display: inline-block;
+    }
+    .market-buttons button:hover,
+    .market-button-group button:hover {
+      background-color: #4b8b8d;
+    }
+    .timeframe-buttons {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+    .timeframe-buttons button {
+      margin: 0 10px;
+      padding: 10px;
+      background-color: #62a4ab;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .timeframe-buttons button:hover {
+      background-color: #4b8b8d;
+    }
+    .minimize-maximize-btns {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .minimize-maximize-btns button {
+      margin: 0 10px;
+      padding: 10px;
+      background-color: #62a4ab;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .minimize-maximize-btns button:hover {
+      background-color: #4b8b8d;
+    }
+    .icon-container {
+      display: flex;
+      gap: 50px;
+    }
+    .icon {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      display: none;
+    }
+    .arrow {
+      width: 0;
+      height: 0;
+      position: absolute;
+    }
+    .buy {
+      background: green;
+    }
+    .buy .arrow {
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-bottom: 40px solid white;
+      top: 20px;
+    }
+    .sell {
+      background: red;
+    }
+    .sell .arrow {
+      border-left: 20px solid transparent;
+      border-right: 20px solid transparent;
+      border-top: 40px solid white;
+      bottom: 20px;
+    }
+    .label {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      color: white;
+      background: green;
+      padding: 5px 15px;
+      border-radius: 5px;
+      margin-top: 10px;
+    }
+    .sell .label {
+      background: red;
+    }
+  </style>
+</head>
+<body>
+  <h1>Live Chart Volatility Market</h1>
+
+  <div class="market-buttons">
+    <button onclick="toggleMarketButtons()">Select Market</button>
+    <div class="market-button-group">
+      <button onclick="selectMarket('R_10')">Volatility 10</button>
+      <button onclick="selectMarket('R_25')">Volatility 25</button>
+      <button onclick="selectMarket('R_50')">Volatility 50</button>
+      <button onclick="selectMarket('R_75')">Volatility 75</button>
+      <button onclick="selectMarket('R_100')">Volatility 100</button>
+    </div>
+  </div>
+
+  <div class="timeframe-buttons">
+    <button onclick="setTimeFrame(1)">1m</button>
+    <button onclick="setTimeFrame(5)">5m</button>
+    <button onclick="setTimeFrame(10)">10m</button>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="dynamicChart"></canvas>
+  </div>
+
+  <div class="chart-container">
+    <canvas id="rsiChart"></canvas>
+  </div>
+
+  <div class="icon-container">
+    <div class="icon buy">
+      <div class="arrow"></div>
+      <div class="label">BUY</div>
+    </div>
+    <div class="icon sell">
+      <div class="arrow"></div>
+      <div class="label">SELL</div>
+    </div>
+  </div>
+
+  <div class="minimize-maximize-btns">
+    <button onclick="minimizeChart()">Minimize</button>
+    <button onclick="maximizeChart()">Maximize</button>
+  </div>
+
+  <script>
+    // Toggle market buttons visibility
+    function toggleMarketButtons() {
+      const marketButtonGroup = document.querySelector('.market-button-group');
+      marketButtonGroup.style.display = marketButtonGroup.style.display === 'none' ? 'flex' : 'none';
+    }
+
+    // Minimize and maximize chart
+    function minimizeChart() {
+      document.querySelector('.chart-container').style.height = '15vh'; // Minimize to smaller height
+      document.querySelector('.chart-container').style.transition = 'height 0.5s';
+    }
+
+    function maximizeChart() {
+      document.querySelector('.chart-container').style.height = '30vh'; // Maximize back to 30vh
+      document.querySelector('.chart-container').style.transition = 'height 0.5s';
+    }
+
+    // Function to play sound when RSI crosses
+    function playMusic() {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+        const notes = [
+            { frequency: 261.63, duration: 400 }, // C4
+            { frequency: 293.66, duration: 400 }, // D4
+            { frequency: 329.63, duration: 400 }, // E4
+            { frequency: 349.23, duration: 400 }  // F4
+        ];
+
+        let currentTime = audioContext.currentTime;
+        const repeatTimes = 5;
+        for (let i = 0; i < repeatTimes; i++) {
+            notes.forEach(note => {
+                const oscillator = audioContext.createOscillator();
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(note.frequency, currentTime);
+                oscillator.connect(audioContext.destination);
+
+                oscillator.start(currentTime);
+                oscillator.stop(currentTime + note.duration / 1000);
+                currentTime += note.duration / 1000;
+            });
+        }
+    }
+
+    const ctx = document.getElementById('dynamicChart').getContext('2d');
+    const rsiCtx = document.getElementById('rsiChart').getContext('2d');
+
+    const dynamicChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'Price',
+          data: [],
+          borderColor: '#62a4ab',
+          backgroundColor: 'rgba(98, 164, 171, 0.2)',
+          borderWidth: 2,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true },
+          tooltip: { enabled: true }
+        },
+        scales: {
+          y: { beginAtZero: false, grid: { color: '#d3e9eb' } },
+          x: { grid: { color: '#d3e9eb' } }
+        }
+      }
+    });
+
+    const rsiChart = new Chart(rsiCtx, {
+      type: 'line',
+      data: {
+        labels: [],
+        datasets: [{
+          label: 'RSI',
+          data: [],
+          borderColor: 'rgba(255, 99, 132, 1)',
+          backgroundColor: 'rgba(255, 99, 132, 0.2)',
+          borderWidth: 2,
+          tension: 0.4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: true },
+          tooltip: { enabled: true },
+          annotation: {
+            annotations: [
+              {
+                type: 'line',
+                mode: 'horizontal',
+                scaleID: 'y',
+                value: 30,
+                borderColor: 'green',
+                borderWidth: 2,
+                label: { enabled: true, content: '30', position: 'right' }
+              },
+              {
+                type: 'line',
+                mode: 'horizontal',
+                scaleID: 'y',
+                value: 80,
+                borderColor: 'red',
+                borderWidth: 2,
+                label: { enabled: true, content: '80', position: 'right' }
+              }
+            ]
+          }
+        },
+        scales: {
+          y: { beginAtZero: true, max: 100, min: 0, grid: { color: '#d3e9eb' } },
+          x: { grid: { color: '#d3e9eb' } }
+        }
+      }
+    });
+
+    const API_TOKEN = 'Je5KwLgHrMOuIya'; // Replace with your API token
+    const API_URL = 'wss://ws.binaryws.com/websockets/v3?app_id=67562'; // Deriv WebSocket URL
+
+    let connection = null;
+    let previousPrices = [];
+    let timeInterval = 1; // Default to 1 minute
+
+    function setTimeFrame(interval) {
+      timeInterval = interval;
+      dynamicChart.data.labels = [];
+      dynamicChart.data.datasets[0].data = [];
+      rsiChart.data.labels = [];
+      rsiChart.data.datasets[0].data = [];
+      dynamicChart.update();
+      rsiChart.update();
+    }
+
+    function selectMarket(market) {
+      if (connection && connection.readyState === WebSocket.OPEN) {
+        connection.close(); 
+      }
+
+      connection = new WebSocket(API_URL);
+
+      connection.onopen = () => {
+        connection.send(JSON.stringify({ authorize: API_TOKEN }));
+        connection.send(JSON.stringify({ ticks: market, subscribe: 1 }));
+      };
+
+      connection.onmessage = (event) => {
+        const response = JSON.parse(event.data);
+        if (response.msg_type === 'tick') {
+          const tick = response.tick;
+          const price = tick.quote;
+          const time = new Date(tick.epoch * 1000).toLocaleTimeString();
+          dynamicChart.data.labels.push(time);
+          dynamicChart.data.datasets[0].data.push(price);
+
+          if (dynamicChart.data.labels.length > timeInterval * 10) {
+            dynamicChart.data.labels.shift();
+            dynamicChart.data.datasets[0].data.shift();
+          }
+
+          previousPrices.push(price);
+          if (previousPrices.length > 14) {
+            previousPrices.shift();
+          }
+
+          if (previousPrices.length === 14) {
+            const rsiValue = calculateRSI(previousPrices);
+            rsiChart.data.labels.push(time);
+            rsiChart.data.datasets[0].data.push(rsiValue);
+
+            if (rsiChart.data.labels.length > timeInterval * 10) {
+              rsiChart.data.labels.shift();
+              rsiChart.data.datasets[0].data.shift();
+            }
+
+            rsiChart.update();
+
+            // Show the corresponding icon based on RSI crossover
+            const buyIcon = document.querySelector('.buy');
+            const sellIcon = document.querySelector('.sell');
+
+            if (rsiValue <= 30) {
+              playMusic();
+              dynamicChart.data.datasets[0].borderColor = 'green'; // Green line for rise
+              buyIcon.style.display = 'block';
+              sellIcon.style.display = 'none';
+            } else if (rsiValue >= 80) {
+              playMusic();
+              dynamicChart.data.datasets[0].borderColor = 'red'; // Red line for fall
+              buyIcon.style.display = 'none';
+              sellIcon.style.display = 'block';
+            }
+          }
+
+          dynamicChart.update();
+        }
+      };
+
+      connection.onerror = (error) => {
+        console.error('WebSocket error:', error);
+      };
+
+      connection.onclose = () => {
+        console.log('WebSocket disconnected');
+      };
+    }
+
+    function calculateRSI(prices) {
+      let gains = 0, losses = 0;
+      for (let i = 1; i < prices.length; i++) {
+        const change = prices[i] - prices[i - 1];
+        if (change > 0) {
+          gains += change;
+        } else {
+          losses -= change;
+        }
+      }
+
+      const averageGain = gains / 14;
+      const averageLoss = losses / 14;
+
+      const rs = averageGain / averageLoss;
+      const rsi = 100 - (100 / (1 + rs));
+
+      return rsi;
+    }
+  </script>
+</body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
