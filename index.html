@@ -1,439 +1,255 @@
 <!DOCTYPE html>
-<html lang="en" >
-<head>
-  <meta charset="UTF-8">
-  <title>Untitled</title>
-  
-
-</head>
-<body>
-<!-- partial:index.partial.html -->
-Put your HTML text here<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Live Chart with Volatility Market and RSI</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>BinaryTools UI – Alternate Design</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script> <!-- Add annotation plugin -->
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-      background-color: #eaf7f8;
-      flex-direction: column;
-      padding: 0 10px;
+    /* Global */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', sans-serif; background: #121212; color: #ececec; }
+    a { color: inherit; text-decoration: none; }
+
+    /* Layout */
+    .container { display: flex; height: 100vh; }
+    .sidebar {
+      width: 240px; background: #1f1f1f; display: flex; flex-direction: column; padding-top: 1rem;
     }
-    .chart-container {
-      width: 100%;
-      max-width: 60%; /* Reduce max width to 60% */
-      height: 30vh;   /* Set a smaller height */
-      margin-bottom: 20px;
+    .sidebar-item {
+      padding: 0.8rem 1rem; display: flex; align-items: center; gap: 0.8rem;
+      color: #aaa; cursor: pointer; transition: background 0.2s, color 0.2s;
     }
-    canvas {
-      display: block;
-      width: 100%;
-      height: 100%;
+    .sidebar-item i { width: 20px; text-align: center; }
+    .sidebar-item:hover { background: #333; color: #fff; }
+    .sidebar-item.active { background: #4ecdc4; color: #121212; }
+
+    .main { flex: 1; display: flex; flex-direction: column; }
+    .topbar {
+      height: 56px; background: #2a2a2a; display: flex; align-items: center;
+      justify-content: space-between; padding: 0 1rem; font-size: 0.95rem;
     }
-    h1 {
-      font-size: 1.5rem;
-      margin-bottom: 20px;
+    .topbar .left, .topbar .right { display: flex; align-items: center; gap: 1rem; }
+    .topbar i { color: #4ecdc4; }
+
+    .content { flex: 1; overflow-y: auto; padding: 1rem; }
+    .hidden { display: none; }
+
+    /* Section headers */
+    .content h2, .content h3 { color: #ffe66d; margin-bottom: 0.5rem; }
+
+    /* Stats Cards */
+    .stats { display: flex; gap: 1rem; margin-bottom: 1.5rem; }
+    .card {
+      background: #1f1f1f; flex: 1; padding: 1rem;
+      border-left: 4px solid #4ecdc4; border-radius: 4px;
     }
-    .market-buttons {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
-      flex-direction: column;
-      width: 100%;
+    .card h4 { margin-bottom: 0.5rem; color: #ffe66d; }
+    .card p { font-size: 1.2rem; }
+
+    /* Volatility Table */
+    .table-wrapper {
+      max-height: 300px; overflow-y: auto; border: 1px solid #333; border-radius: 4px;
     }
-    .market-button-group {
-      display: none;
-      justify-content: center;
-      margin-top: 10px;
+    table {
+      width: 100%; border-collapse: collapse; background: #1f1f1f;
     }
-    .market-buttons button,
-    .market-button-group button {
-      margin: 0 10px;
-      padding: 10px;
-      background-color: #62a4ab;
-      color: white;
-      border: none;
-      cursor: pointer;
-      display: inline-block;
+    th, td {
+      padding: 0.6rem; border-bottom: 1px solid #333; font-size: 0.9rem;
     }
-    .market-buttons button:hover,
-    .market-button-group button:hover {
-      background-color: #4b8b8d;
-    }
-    .timeframe-buttons {
-      display: flex;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
-    .timeframe-buttons button {
-      margin: 0 10px;
-      padding: 10px;
-      background-color: #62a4ab;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    .timeframe-buttons button:hover {
-      background-color: #4b8b8d;
-    }
-    .minimize-maximize-btns {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-    }
-    .minimize-maximize-btns button {
-      margin: 0 10px;
-      padding: 10px;
-      background-color: #62a4ab;
-      color: white;
-      border: none;
-      cursor: pointer;
-    }
-    .minimize-maximize-btns button:hover {
-      background-color: #4b8b8d;
-    }
-    .icon-container {
-      display: flex;
-      gap: 50px;
-    }
-    .icon {
-      width: 100px;
-      height: 100px;
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      position: relative;
-      display: none;
-    }
-    .arrow {
-      width: 0;
-      height: 0;
-      position: absolute;
-    }
-    .buy {
-      background: green;
-    }
-    .buy .arrow {
-      border-left: 20px solid transparent;
-      border-right: 20px solid transparent;
-      border-bottom: 40px solid white;
-      top: 20px;
-    }
-    .sell {
-      background: red;
-    }
-    .sell .arrow {
-      border-left: 20px solid transparent;
-      border-right: 20px solid transparent;
-      border-top: 40px solid white;
-      bottom: 20px;
-    }
-    .label {
-      text-align: center;
-      font-size: 18px;
-      font-weight: bold;
-      color: white;
-      background: green;
-      padding: 5px 15px;
-      border-radius: 5px;
-      margin-top: 10px;
-    }
-    .sell .label {
-      background: red;
-    }
+    th { background: #2a2a2a; color: #ffe66d; }
+    .green { color: #4ecdc4; }
+    .red { color: #ff6b6b; }
+    canvas.spark { width: 80px !important; height: 25px !important; }
   </style>
 </head>
 <body>
-  <h1>Live Chart Volatility Market</h1>
+  <div class="container">
+    <!-- Sidebar -->
+    <nav class="sidebar">
+      <div class="sidebar-item active" data-section="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</div>
+      <div class="sidebar-item" data-section="freebots"><i class="fas fa-robot"></i> Free Bots</div>
+      <div class="sidebar-item" data-section="botbuilder"><i class="fas fa-cogs"></i> Bot Builder</div>
+      <div class="sidebar-item" data-section="manual"><i class="fas fa-microscope"></i> Manual Analyzer</div>
+      <div class="sidebar-item" data-section="tools"><i class="fas fa-tools"></i> Analysis Tools</div>
+      <div class="sidebar-item" data-section="signals"><i class="fas fa-signal"></i> Signals</div>
+      <div class="sidebar-item" data-section="charts"><i class="fas fa-chart-line"></i> Charts</div>
+      <div class="sidebar-item" data-section="auto-analyzer"><i class="fas fa-rocket"></i> Auto Analyzer</div>
+      <div class="sidebar-item" data-section="smart"><i class="fas fa-brain"></i> Smart Auto</div>
+    </nav>
 
-  <div class="market-buttons">
-    <button onclick="toggleMarketButtons()">Select Market</button>
-    <div class="market-button-group">
-      <button onclick="selectMarket('R_10')">Volatility 10</button>
-      <button onclick="selectMarket('R_25')">Volatility 25</button>
-      <button onclick="selectMarket('R_50')">Volatility 50</button>
-      <button onclick="selectMarket('R_75')">Volatility 75</button>
-      <button onclick="selectMarket('R_100')">Volatility 100</button>
-    </div>
+    <!-- Main Content -->
+    <section class="main">
+      <!-- Topbar -->
+      <header class="topbar">
+        <div class="left"><i class="fas fa-comment-dots"></i><span>Reports</span></div>
+        <div class="right"><span id="top-balance">Loading...</span><i class="fas fa-caret-down"></i></div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content">
+        <!-- Dashboard -->
+        <div id="content-dashboard">
+          <h2>Deriv Dashboard</h2>
+          <div class="stats">
+            <div class="card"><h4>Balance</h4><p id="balance" class="green">Loading...</p></div>
+            <div class="card"><h4>CR Number</h4><p id="cr">Loading...</p></div>
+            <div class="card"><h4>Daily PnL</h4><p id="pnl" class="green">+0.00</p></div>
+          </div>
+
+          <h3>Volatility Live Prices</h3>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr><th>Symbol</th><th>Name</th><th>Price</th><th>% Chg</th><th>Time</th><th>Sparkline</th></tr>
+              </thead>
+              <tbody id="vol-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
   </div>
 
-  <div class="timeframe-buttons">
-    <button onclick="setTimeFrame(1)">1m</button>
-    <button onclick="setTimeFrame(5)">5m</button>
-    <button onclick="setTimeFrame(10)">10m</button>
-  </div>
-
-  <div class="chart-container">
-    <canvas id="dynamicChart"></canvas>
-  </div>
-
-  <div class="chart-container">
-    <canvas id="rsiChart"></canvas>
-  </div>
-
-  <div class="icon-container">
-    <div class="icon buy">
-      <div class="arrow"></div>
-      <div class="label">BUY</div>
-    </div>
-    <div class="icon sell">
-      <div class="arrow"></div>
-      <div class="label">SELL</div>
-    </div>
-  </div>
-
-  <div class="minimize-maximize-btns">
-    <button onclick="minimizeChart()">Minimize</button>
-    <button onclick="maximizeChart()">Maximize</button>
-  </div>
+  <!-- Audio Alerts -->
+  <audio id="upSound" src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg" preload="auto"></audio>
+  <audio id="downSound" src="https://actions.google.com/sounds/v1/cartoon/wood_plank_flicks.ogg" preload="auto"></audio>
 
   <script>
-    // Toggle market buttons visibility
-    function toggleMarketButtons() {
-      const marketButtonGroup = document.querySelector('.market-button-group');
-      marketButtonGroup.style.display = marketButtonGroup.style.display === 'none' ? 'flex' : 'none';
-    }
+    // ──────────────── OAUTH + TOKEN HANDLING ────────────────
+    const APP_ID       = 'YOUR_APP_ID';  // ← replace with your Deriv App ID
+    const REDIRECT_URI = window.location.origin + window.location.pathname; 
+    const OAUTH_URL    = `https://oauth.deriv.com/oauth2/authorize?app_id=${APP_ID}&redirect_uri=${encodeURIComponent(REDIRECT_URI)}`;
 
-    // Minimize and maximize chart
-    function minimizeChart() {
-      document.querySelector('.chart-container').style.height = '15vh'; // Minimize to smaller height
-      document.querySelector('.chart-container').style.transition = 'height 0.5s';
-    }
-
-    function maximizeChart() {
-      document.querySelector('.chart-container').style.height = '30vh'; // Maximize back to 30vh
-      document.querySelector('.chart-container').style.transition = 'height 0.5s';
-    }
-
-    // Function to play sound when RSI crosses
-    function playMusic() {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-
-        const notes = [
-            { frequency: 261.63, duration: 400 }, // C4
-            { frequency: 293.66, duration: 400 }, // D4
-            { frequency: 329.63, duration: 400 }, // E4
-            { frequency: 349.23, duration: 400 }  // F4
-        ];
-
-        let currentTime = audioContext.currentTime;
-        const repeatTimes = 5;
-        for (let i = 0; i < repeatTimes; i++) {
-            notes.forEach(note => {
-                const oscillator = audioContext.createOscillator();
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(note.frequency, currentTime);
-                oscillator.connect(audioContext.destination);
-
-                oscillator.start(currentTime);
-                oscillator.stop(currentTime + note.duration / 1000);
-                currentTime += note.duration / 1000;
-            });
-        }
-    }
-
-    const ctx = document.getElementById('dynamicChart').getContext('2d');
-    const rsiCtx = document.getElementById('rsiChart').getContext('2d');
-
-    const dynamicChart = new Chart(ctx, {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: [{
-          label: 'Price',
-          data: [],
-          borderColor: '#62a4ab',
-          backgroundColor: 'rgba(98, 164, 171, 0.2)',
-          borderWidth: 2,
-          tension: 0.4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: true },
-          tooltip: { enabled: true }
-        },
-        scales: {
-          y: { beginAtZero: false, grid: { color: '#d3e9eb' } },
-          x: { grid: { color: '#d3e9eb' } }
-        }
+    // If the URL contains an OAuth callback with tokens, grab token1 & acct1
+    (function handleOAuthCallback() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.has('token1') && params.has('acct1')) {
+        localStorage.setItem('deriv_token', params.get('token1'));
+        localStorage.setItem('deriv_loginid', params.get('acct1'));
+        // Remove query params from URL
+        history.replaceState(null, '', REDIRECT_URI);
       }
+    })();
+
+    // If no token is stored, send user to Deriv OAuth
+    const TOKEN = localStorage.getItem('deriv_token');
+    if (!TOKEN) {
+      window.location.href = OAUTH_URL;
+    }
+
+    // ──────────────── SIDEBAR ROUTING ────────────────
+    document.querySelectorAll('.sidebar-item').forEach(el => {
+      el.onclick = () => {
+        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
+        el.classList.add('active');
+        document.querySelectorAll('[id^="content-"]').forEach(c => c.classList.add('hidden'));
+        document.getElementById('content-' + el.dataset.section).classList.remove('hidden');
+      };
     });
 
-    const rsiChart = new Chart(rsiCtx, {
-      type: 'line',
-      data: {
-        labels: [],
-        datasets: [{
-          label: 'RSI',
-          data: [],
-          borderColor: 'rgba(255, 99, 132, 1)',
-          backgroundColor: 'rgba(255, 99, 132, 0.2)',
-          borderWidth: 2,
-          tension: 0.4
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { display: true },
-          tooltip: { enabled: true },
-          annotation: {
-            annotations: [
-              {
-                type: 'line',
-                mode: 'horizontal',
-                scaleID: 'y',
-                value: 30,
-                borderColor: 'green',
-                borderWidth: 2,
-                label: { enabled: true, content: '30', position: 'right' }
-              },
-              {
-                type: 'line',
-                mode: 'horizontal',
-                scaleID: 'y',
-                value: 80,
-                borderColor: 'red',
-                borderWidth: 2,
-                label: { enabled: true, content: '80', position: 'right' }
-              }
-            ]
-          }
-        },
-        scales: {
-          y: { beginAtZero: true, max: 100, min: 0, grid: { color: '#d3e9eb' } },
-          x: { grid: { color: '#d3e9eb' } }
-        }
-      }
-    });
+    // ──────────────── DERIV WEBSOCKET & UI UPDATE ────────────────
+    const symbols = [
+      { symbol: 'R_10_1s',  name: 'Volatility 10 (1s) Index' },
+      { symbol: 'R_10',     name: 'Volatility 10 Index' },
+      { symbol: 'R_25_1s',  name: 'Volatility 25 (1s) Index' },
+      { symbol: 'R_25',     name: 'Volatility 25 Index' },
+      { symbol: 'R_50_1s',  name: 'Volatility 50 (1s) Index' },
+      { symbol: 'R_50',     name: 'Volatility 50 Index' },
+      { symbol: 'R_75_1s',  name: 'Volatility 75 (1s) Index' },
+      { symbol: 'R_75',     name: 'Volatility 75 Index' },
+      { symbol: 'R_100_1s', name: 'Volatility 100 (1s) Index' },
+      { symbol: 'R_100',    name: 'Volatility 100 Index' },
+    ];
 
-    const API_TOKEN = 'Je5KwLgHrMOuIya'; // Replace with your API token
-    const API_URL = 'wss://ws.binaryws.com/websockets/v3?app_id=67562'; // Deriv WebSocket URL
+    const ws = new WebSocket(`wss://ws.derivws.com/websockets/v3?app_id=${APP_ID}`);
+    const priceData  = {}, chartRefs = {};
+    const volBody    = document.getElementById('vol-body');
+    const balEl      = document.getElementById('balance');
+    const crEl       = document.getElementById('cr');
+    const pnlEl      = document.getElementById('pnl');
+    const upSound    = document.getElementById('upSound');
+    const downSound  = document.getElementById('downSound');
+    let   runningPnl = 0;
 
-    let connection = null;
-    let previousPrices = [];
-    let timeInterval = 1; // Default to 1 minute
+    ws.onopen = () => {
+      // AUTHORIZE with our OAuth token
+      ws.send(JSON.stringify({ authorize: TOKEN }));
+    };
 
-    function setTimeFrame(interval) {
-      timeInterval = interval;
-      dynamicChart.data.labels = [];
-      dynamicChart.data.datasets[0].data = [];
-      rsiChart.data.labels = [];
-      rsiChart.data.datasets[0].data = [];
-      dynamicChart.update();
-      rsiChart.update();
-    }
+    ws.onmessage = msg => {
+      const data = JSON.parse(msg.data);
 
-    function selectMarket(market) {
-      if (connection && connection.readyState === WebSocket.OPEN) {
-        connection.close(); 
+      // On successful auth, subscribe to ticks
+      if (data.msg_type === 'authorize') {
+        balEl.textContent = parseFloat(data.authorize.balance).toFixed(2) + ' USD';
+        document.getElementById('top-balance').textContent = balEl.textContent;
+        crEl.textContent  = data.authorize.loginid;
+        symbols.forEach(s => ws.send(JSON.stringify({ ticks: s.symbol, subscribe: 1 })));
       }
 
-      connection = new WebSocket(API_URL);
+      // On each tick, update table & sparkline
+      if (data.msg_type === 'tick') {
+        const { symbol, quote, epoch } = data.tick;
+        const prev = priceData[symbol]?.last ?? quote;
+        const diff = quote - prev;
+        const pct  = ((diff / prev) * 100).toFixed(2);
+        const time = new Date(epoch * 1000).toLocaleTimeString();
 
-      connection.onopen = () => {
-        connection.send(JSON.stringify({ authorize: API_TOKEN }));
-        connection.send(JSON.stringify({ ticks: market, subscribe: 1 }));
-      };
+        // Maintain a small history for sparklines
+        priceData[symbol] = priceData[symbol] || { history: [] };
+        const hist = priceData[symbol].history;
+        hist.push(quote);
+        if (hist.length > 20) hist.shift();
+        priceData[symbol].last = quote;
 
-      connection.onmessage = (event) => {
-        const response = JSON.parse(event.data);
-        if (response.msg_type === 'tick') {
-          const tick = response.tick;
-          const price = tick.quote;
-          const time = new Date(tick.epoch * 1000).toLocaleTimeString();
-          dynamicChart.data.labels.push(time);
-          dynamicChart.data.datasets[0].data.push(price);
+        // If row doesn't exist yet, create it
+        let row = document.getElementById('row-' + symbol);
+        if (!row) {
+          row = document.createElement('tr');
+          row.id = 'row-' + symbol;
+          row.innerHTML = `
+            <td>${symbol}</td>
+            <td>${symbols.find(s => s.symbol === symbol).name}</td>
+            <td id="p-${symbol}">-</td>
+            <td id="c-${symbol}"></td>
+            <td id="t-${symbol}">-</td>
+            <td><canvas class="spark" id="chart-${symbol}"></canvas></td>
+          `;
+          volBody.appendChild(row);
 
-          if (dynamicChart.data.labels.length > timeInterval * 10) {
-            dynamicChart.data.labels.shift();
-            dynamicChart.data.datasets[0].data.shift();
-          }
-
-          previousPrices.push(price);
-          if (previousPrices.length > 14) {
-            previousPrices.shift();
-          }
-
-          if (previousPrices.length === 14) {
-            const rsiValue = calculateRSI(previousPrices);
-            rsiChart.data.labels.push(time);
-            rsiChart.data.datasets[0].data.push(rsiValue);
-
-            if (rsiChart.data.labels.length > timeInterval * 10) {
-              rsiChart.data.labels.shift();
-              rsiChart.data.datasets[0].data.shift();
-            }
-
-            rsiChart.update();
-
-            // Show the corresponding icon based on RSI crossover
-            const buyIcon = document.querySelector('.buy');
-            const sellIcon = document.querySelector('.sell');
-
-            if (rsiValue <= 30) {
-              playMusic();
-              dynamicChart.data.datasets[0].borderColor = 'green'; // Green line for rise
-              buyIcon.style.display = 'block';
-              sellIcon.style.display = 'none';
-            } else if (rsiValue >= 80) {
-              playMusic();
-              dynamicChart.data.datasets[0].borderColor = 'red'; // Red line for fall
-              buyIcon.style.display = 'none';
-              sellIcon.style.display = 'block';
-            }
-          }
-
-          dynamicChart.update();
+          const ctx = document.getElementById(`chart-${symbol}`).getContext('2d');
+          chartRefs[symbol] = new Chart(ctx, {
+            type: 'line',
+            data: { labels: Array(20).fill(''), datasets: [{ data: hist, borderColor: '#4ecdc4', fill: false, tension: 0.3, pointRadius: 0 }] },
+            options: { responsive: false, plugins: { legend: { display: false } }, scales: { x: { display: false }, y: { display: false } } }
+          });
         }
-      };
 
-      connection.onerror = (error) => {
-        console.error('WebSocket error:', error);
-      };
+        // Update values
+        document.getElementById(`p-${symbol}`).textContent = quote.toFixed(5);
+        const chEl = document.getElementById(`c-${symbol}`);
+        chEl.textContent = pct + '%';
+        chEl.className = diff > 0 ? 'green' : diff < 0 ? 'red' : '';
+        document.getElementById(`t-${symbol}`).textContent = time;
 
-      connection.onclose = () => {
-        console.log('WebSocket disconnected');
-      };
-    }
+        // Update sparkline
+        chartRefs[symbol].data.datasets[0].data = hist;
+        chartRefs[symbol].update();
 
-    function calculateRSI(prices) {
-      let gains = 0, losses = 0;
-      for (let i = 1; i < prices.length; i++) {
-        const change = prices[i] - prices[i - 1];
-        if (change > 0) {
-          gains += change;
-        } else {
-          losses -= change;
+        // Play sounds
+        if (diff > 0) upSound.play();
+        else if (diff < 0) downSound.play();
+
+        // Simulate daily PnL change
+        if (Math.random() > 0.95) {
+          runningPnl += Math.random() > 0.5 ? 1 : -1;
+          pnlEl.textContent = (runningPnl > 0 ? '+' : '') + runningPnl.toFixed(2);
+          pnlEl.className = runningPnl >= 0 ? 'green' : 'red';
         }
       }
-
-      const averageGain = gains / 14;
-      const averageLoss = losses / 14;
-
-      const rs = averageGain / averageLoss;
-      const rsi = 100 - (100 / (1 + rs));
-
-      return rsi;
-    }
+    };
   </script>
-</body>
-</html>
-<!-- partial -->
-  
 </body>
 </html>
