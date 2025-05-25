@@ -2,242 +2,284 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Wallet Dashboard</title>
+  <title>All-in-One Payment Flow</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
     body {
-      margin: 0;
-      font-family: 'Arial', sans-serif;
-      background: #12161C;
-      color: white;
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      display: flex; justify-content: center; align-items: center;
+      padding: 20px;
     }
-
-    .app {
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      padding: 10px;
-      padding-bottom: 60px;
-      box-sizing: border-box;
+    .page {
+      width: 100%; max-width: 800px;
+      background: #fff; padding: 40px; border-radius: 12px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+      display: none;
     }
-
-    header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
+    .page.active { display: block; }
+    h2 { text-align: center; margin-bottom: 30px; }
+    .payment-option { display: flex; align-items: center; margin-bottom: 24px; }
+    .payment-option input { margin-right: 20px; transform: scale(1.5); }
+    .payment-option label { display: flex; align-items: center; cursor: pointer; font-size: 18px; }
+    .payment-option img { height: 48px; margin-right: 16px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .form-group input, .form-group select {
+      width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 6px;
     }
-
-    .time {
-      font-size: 18px;
+    .btn {
+      width: 100%; background: #f62056; color: white; padding: 14px;
+      font-size: 18px; border: none; border-radius: 6px; cursor: pointer;
     }
-
-    .mode-switch button {
-      background: #2A2F36;
-      border: none;
-      color: #aaa;
-      padding: 6px 12px;
-      border-radius: 8px;
-      margin-left: 5px;
+    .btn:disabled { background: #ccc; cursor: not-allowed; }
+    .checkbox-group { display: flex; align-items: center; gap: 10px; margin: 15px 0; }
+    .card-number-group { display: flex; gap: 10px; }
+    .expiry-cvv { display: flex; gap: 10px; }
+    .payment-method-header {
+      display: flex; justify-content: space-between; align-items: center;
+      background: #e6f7e6; padding: 10px 15px; border-radius: 8px;
+      margin-bottom: 20px; border-left: 5px solid green;
     }
-
-    .mode-switch .active {
-      background: #3A3F46;
-      color: white;
+    .card-icons img { height: 24px; margin-left: 8px; }
+    .error-text { color: red; font-size: 12px; margin-top: 4px; }
+    #error-message { color: red; font-size: 13px; text-align: center; margin-top: 10px; display: none; }
+    #loader { display: none; margin: 20px auto; }
+    .spinner { display: flex; justify-content: center; gap: 8px; }
+    .spinner div {
+      width: 12px; height: 12px; background: #f62056; border-radius: 50%;
+      animation: bounce 0.6s infinite alternate;
     }
-
-    .tabs {
-      display: flex;
-      justify-content: space-around;
-      margin-top: 12px;
-      border-bottom: 1px solid #333;
-    }
-
-    .tab {
-      padding: 10px;
-      color: #aaa;
-      border: none;
-      background: transparent;
-      cursor: pointer;
-    }
-
-    .tab.active {
-      color: white;
-      border-bottom: 2px solid #FCD535;
-    }
-
-    .balance-info {
-      margin: 20px 0;
-    }
-
-    .balance-info h1 {
-      font-size: 2.8rem;
-      margin: 5px 0;
-    }
-
-    .balance-info span {
-      font-size: 1rem;
-      color: #aaa;
-    }
-
-    .pnl {
-      color: #aaa;
-    }
-
-    .action-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 15px;
-    }
-
-    .action-buttons button {
-      flex: 1;
-      padding: 10px;
-      background: #2A2F36;
-      border: none;
-      color: white;
-      border-radius: 8px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    .action-buttons .yellow {
-      background: #FCD535;
-      color: #000;
-    }
-
-    .deposit-status {
-      margin: 15px 0;
-      padding: 10px;
-      background: #1E2329;
-      border-radius: 8px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .deposit-status .status {
-      color: #00C076;
-      font-weight: bold;
-    }
-
-    .accounts {
-      margin-top: 10px;
-    }
-
-    .tab-switch {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 10px;
-      font-size: 16px;
-    }
-
-    .tab-switch .inactive {
-      color: #777;
-    }
-
-    .tab-switch .active {
-      color: white;
-      border-bottom: 2px solid #FCD535;
-    }
-
-    .balances div {
-      display: flex;
-      justify-content: space-between;
-      padding: 12px 0;
-      border-bottom: 1px solid #2A2F36;
-      font-size: 18px;
-    }
-
-    footer {
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      background: #1E2329;
-      padding: 12px 0;
-      position: fixed;
-      bottom: 0;
-      width: 100%;
-      border-top: 1px solid #2A2F36;
-    }
-
-    footer div {
-      color: #aaa;
-      font-size: 14px;
-    }
-
-    footer .active {
-      color: white;
-      font-weight: bold;
-    }
+    .spinner div:nth-child(2) { animation-delay: 0.2s; }
+    .spinner div:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { to { transform: translateY(-100%); } }
   </style>
 </head>
 <body>
-  <div class="app">
-    <!-- Header -->
-    <header>
-      <div class="time">21:48</div>
-      <div class="mode-switch">
-        <button class="active">Exchange</button>
-        <button>Wallet</button>
+
+  <!-- Page 1: Payment Selection -->
+  <div class="page active" id="selectPage">
+    <h2>Pay with</h2>
+    <div class="payment-option">
+      <input type="radio" name="payment" id="card" value="cardFlow" />
+      <label for="card">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/0/04/Visa.svg" alt="Visa" />
+        Add new card
+      </label>
+    </div>
+    <div class="payment-option">
+      <input type="radio" name="payment" id="paypal" value="https://www.abs.org.sg/consumer-banking/pay-now" />
+      <label for="paypal">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/b/b5/PayPal.svg" alt="PayPal"/>
+        PayPal
+      </label>
+    </div>
+    <div class="payment-option">
+      <input type="radio" name="payment" id="binance" value="https://lumoalgo.com/cashier/" />
+      <label for="binance">
+        <img src="https://s2.coinmarketcap.com/static/img/coins/64x64/1839.png" alt="Binance Coin Icon" />
+        Binance Pay
+      </label>
+    </div>
+    <div class="payment-option">
+      <input type="radio" name="payment" id="paynow" value="https://www.abs.org.sg/consumer-banking/pay-now" />
+      <label for="paynow">
+        <img src="https://cdn-icons-png.flaticon.com/512/3287/3287960.png" alt="Cash Icon" />
+        PayNow (Singapore)
+      </label>
+    </div>
+    <button class="btn" id="toAmountBtn" disabled>Confirm and pay</button>
+  </div>
+
+  <!-- Page 2: Enter Amount -->
+  <div class="page" id="amountPage">
+    <h2>Enter Amount</h2>
+    <div class="form-group">
+      <label for="usdAmount">Amount (USD)</label>
+      <input type="number" id="usdAmount" placeholder="Enter amount in USD" />
+    </div>
+    <div class="form-group">
+      <label for="currencySelect">Convert to</label>
+      <select id="currencySelect"></select>
+    </div>
+    <div class="form-group">
+      <label for="convertedAmount">Converted Amount</label>
+      <input type="text" id="convertedAmount" readonly />
+    </div>
+    <button class="btn" id="toCardBtn">Confirm</button>
+  </div>
+
+  <!-- Page 3: Card Details -->
+  <div class="page" id="cardPage">
+    <div class="payment-method-header">
+      <div><input type="radio" checked /> Credit &amp; Debit cards</div>
+      <div class="card-icons">
+        <img src="https://img.icons8.com/color/48/000000/visa.png" />
+        <img src="https://img.icons8.com/color/48/000000/mastercard-logo.png" />
+        <img src="https://img.icons8.com/color/48/000000/maestro.png" />
       </div>
-    </header>
-
-    <!-- Top Tabs -->
-    <nav class="tabs">
-      <button class="tab active">Overview</button>
-      <button class="tab">Funding</button>
-      <button class="tab">Spot</button>
-      <button class="tab">Futures</button>
-    </nav>
-
-    <!-- Balance Section -->
-    <section class="balance-info">
-      <p>Total Balance</p>
-      <h1>$100.88 <span>USD</span></h1>
-      <p class="pnl">Today's PNL <span>+$0.00 (+0.00%)</span></p>
-      <div class="action-buttons">
-        <button class="yellow">Add Funds</button>
-        <button>Send</button>
-        <button>Transfer</button>
+    </div>
+    <div class="form-group">
+      <label>You are paying:</label>
+      <input type="text" id="amountDisplay" readonly />
+    </div>
+    <div class="form-group">
+      <label>Cardholder Name</label>
+      <input type="text" id="cardName" />
+      <div class="error-text" id="errorName"></div>
+    </div>
+    <div class="form-group">
+      <label>Card Number</label>
+      <div class="card-number-group">
+        <input type="text" maxlength="4" id="n1" placeholder="1234" />
+        <input type="text" maxlength="4" id="n2" placeholder="5678" />
+        <input type="text" maxlength="4" id="n3" placeholder="9012" />
+        <input type="text" maxlength="4" id="n4" placeholder="3456" />
       </div>
-    </section>
-
-    <!-- Deposit Info -->
-    <section class="deposit-status">
-      <span>📩 Pay deposit 100 USDT</span>
-      <span class="status">Completed</span>
-    </section>
-
-    <!-- Account Info -->
-    <section class="accounts">
-      <div class="tab-switch">
-        <span class="inactive">Crypto</span>
-        <span class="active">Account</span>
+      <div class="error-text" id="errorNumber"></div>
+    </div>
+    <div class="expiry-cvv">
+      <div class="form-group">
+        <label>End Date</label>
+        <div style="display:flex; gap:8px;">
+          <select id="monthSelect"><option>mm</option></select>
+          <select id="yearSelect"><option>yyyy</option></select>
+        </div>
+        <div class="error-text" id="errorDate"></div>
       </div>
-      <div class="balances">
-        <div>Funding <span>$100.86</span></div>
-        <div>Spot <span>$0.02635978</span></div>
-        <div>Futures <span>$0.00</span></div>
+      <div class="form-group">
+        <label>CVV</label>
+        <input type="text" maxlength="3" id="cvv" placeholder="3 digits" />
+        <div class="error-text" id="errorCVV"></div>
       </div>
-    </section>
-
-    <!-- Footer Navigation -->
-    <footer>
-      <div>Home</div>
-      <div>Markets</div>
-      <div>Trade</div>
-      <div>Futures</div>
-      <div class="active">Assets</div>
-    </footer>
+    </div>
+    <div class="checkbox-group">
+      <input type="checkbox" id="terms" />
+      <label>I accept the terms of use, rules of flight and privacy policy</label>
+    </div>
+    <div class="error-text" id="errorTerms"></div>
+    <button class="btn" id="payNowBtn">Pay Now »</button>
+    <div id="loader">
+      <div class="spinner"><div></div><div></div><div></div></div>
+    </div>
+    <div id="error-message"></div>
   </div>
 
   <script>
-    // Tab switching logic
-    document.querySelectorAll('.tab').forEach(tab => {
-      tab.addEventListener('click', () => {
-        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-        tab.classList.add('active');
+    // page controls
+    const selectPage  = document.getElementById('selectPage');
+    const amountPage  = document.getElementById('amountPage');
+    const cardPage    = document.getElementById('cardPage');
+    const toAmountBtn = document.getElementById('toAmountBtn');
+
+    let selectedValue = null;
+    document.querySelectorAll('input[name="payment"]').forEach(r => {
+      r.addEventListener('change', () => {
+        selectedValue = r.value;
+        toAmountBtn.disabled = false;
       });
+    });
+
+    toAmountBtn.addEventListener('click', () => {
+      if (selectedValue === 'cardFlow') {
+        selectPage.classList.remove('active');
+        amountPage.classList.add('active');
+      } else {
+        window.location.href = selectedValue;
+      }
+    });
+
+    // exchange rate & amount conversion
+    let rates = {};
+    const usdInput       = document.getElementById("usdAmount");
+    const currencySelect = document.getElementById("currencySelect");
+    const converted      = document.getElementById("convertedAmount");
+    const amountDisplay  = document.getElementById("amountDisplay");
+
+    fetch("https://api.exchangerate-api.com/v4/latest/USD")
+      .then(r=>r.json())
+      .then(data=>{
+        rates = data.rates;
+        for (let c in rates) {
+          const opt = document.createElement("option");
+          opt.value = c; opt.textContent = c;
+          currencySelect.appendChild(opt);
+        }
+        currencySelect.value = "LKR";
+      });
+
+    function updateConversion(){
+      const usd = parseFloat(usdInput.value);
+      const cur = currencySelect.value;
+      if (usd>0 && rates[cur]) {
+        converted.value = (usd*rates[cur]).toFixed(2) + " " + cur;
+      } else converted.value = "";
+    }
+    usdInput.addEventListener('input', updateConversion);
+    currencySelect.addEventListener('change', updateConversion);
+
+    // move to card page
+    document.getElementById('toCardBtn').addEventListener('click', ()=>{
+      const usd = parseFloat(usdInput.value);
+      const cur = currencySelect.value;
+      if (!usd || usd<=0) return alert("Enter a valid amount.");
+      const conv = (usd*rates[cur]).toFixed(2);
+      amountDisplay.value = `USD ${usd.toFixed(2)} ≈ ${conv} ${cur}`;
+      amountPage.classList.remove('active');
+      cardPage.classList.add('active');
+    });
+
+    // populate expiry selects
+    const mSel = document.getElementById('monthSelect');
+    const ySel = document.getElementById('yearSelect');
+    for (let i=1;i<=12;i++) mSel.innerHTML += `<option>${i}</option>`;
+    for (let y=2022;y<=2028;y++) ySel.innerHTML += `<option>${y}</option>`;
+
+    // declinePayment logic
+    document.getElementById('payNowBtn').addEventListener('click', ()=>{
+      let valid = true;
+      document.querySelectorAll('.error-text').forEach(e=>e.textContent="");
+      document.getElementById('error-message').style.display='none';
+
+      if (!document.getElementById('cardName').value.trim()) {
+        document.getElementById('errorName').textContent = "Required.";
+        valid=false;
+      }
+      const nums = ['n1','n2','n3','n4'].map(id=>document.getElementById(id).value);
+      if (nums.some(n=>!/^\d{4}$/.test(n))){
+        document.getElementById('errorNumber').textContent = "Enter all 4 digits.";
+        valid=false;
+      }
+      if (mSel.value==='mm'||ySel.value==='yyyy'){
+        document.getElementById('errorDate').textContent="Select expiry.";
+        valid=false;
+      }
+      if (!/^\d{3}$/.test(document.getElementById('cvv').value)) {
+        document.getElementById('errorCVV').textContent="Invalid CVV.";
+        valid=false;
+      }
+      if (!document.getElementById('terms').checked){
+        document.getElementById('errorTerms').textContent="Accept terms.";
+        valid=false;
+      }
+
+      if (valid) {
+        const loader = document.getElementById('loader');
+        loader.style.display='block';
+        const errs = [
+          '❌ Your card was declined.',
+          '⚠️ Payment could not be processed.',
+          '❗ Transaction failed.'
+        ];
+        setTimeout(()=>{
+          loader.style.display='none';
+          const msg = errs[Math.floor(Math.random()*errs.length)];
+          const em = document.getElementById('error-message');
+          em.textContent=msg; em.style.display='block';
+        }, Math.random()*1500+1000);
+      }
     });
   </script>
 </body>
