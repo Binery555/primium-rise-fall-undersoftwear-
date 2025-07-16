@@ -170,7 +170,8 @@
       padding: 12px;
       border-radius: 8px;
       transition: transform 0.5s ease;
-      margin-left: -0.1cm; /* Shift cards slightly to the left */
+      /* shift each card 0.13cm to the left */
+      margin-left: -0.13cm;
     }
     .trade-panel .header {
       display: flex;
@@ -388,8 +389,8 @@
 
       const panel = document.createElement('div');
       panel.className = 'trade-panel';
-      panel.innerHTML = `
-        <div class="header">
+      panel.innerHTML = 
+        `<div class="header">
           <span class="icon-buy">B</span>
           <span class="symbol">${sym}</span>
           <span class="tag">PERP</span>
@@ -456,8 +457,7 @@
           <button class="btn">TP/SL</button>
           <button class="btn">Close</button>
           <button class="btn">Reverse</button>
-        </div>
-      `;
+        </div>`;
       feedDiv.appendChild(panel);
       trades.push({ panel, entryPrice, margin, leverage, sym });
     }
