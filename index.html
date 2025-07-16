@@ -165,14 +165,15 @@
     }
     .feed::-webkit-scrollbar { display: none; }
 
+    /* Shift all profit cards 0.16cm to the left */
     .trade-panel {
       background: var(--panel-bg);
       padding: 12px;
       border-radius: 8px;
       transition: transform 0.5s ease;
-      /* shift each card 0.13cm to the left */
-      margin-left: -0.13cm;
+      margin-left: -0.16cm;
     }
+
     .trade-panel .header {
       display: flex;
       align-items: center;
@@ -389,8 +390,8 @@
 
       const panel = document.createElement('div');
       panel.className = 'trade-panel';
-      panel.innerHTML = 
-        `<div class="header">
+      panel.innerHTML = `
+        <div class="header">
           <span class="icon-buy">B</span>
           <span class="symbol">${sym}</span>
           <span class="tag">PERP</span>
@@ -457,7 +458,8 @@
           <button class="btn">TP/SL</button>
           <button class="btn">Close</button>
           <button class="btn">Reverse</button>
-        </div>`;
+        </div>
+      `;
       feedDiv.appendChild(panel);
       trades.push({ panel, entryPrice, margin, leverage, sym });
     }
@@ -471,7 +473,6 @@
         let absPct = Math.abs(currentPct);
         absPct += (Math.random() * 2 - 1) * maxDeltaPct;
         absPct = Math.max(minPercent, Math.min(maxPercent, absPct));
-        const newPct = sign * absPct;
         let profitVal = t.margin * absPct / 100 * sign;
         profitVal = sign * Math.min(maxPnl, Math.max(minPnl, Math.abs(profitVal)));
         const markPrice = t.entryPrice + profitVal / sizeCoins;
