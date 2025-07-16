@@ -25,6 +25,7 @@
       --text-secondary: #7c828a;
       --text-green: #3acf87;
       --text-red: #e04b4a;
+      --highlight: #f0b90b;
     }
 
     body {
@@ -87,18 +88,12 @@
       white-space: nowrap;
     }
     nav.main-nav a.active {
+      font-weight: 500;
+      /* Overview stays secondary gray */
+    }
+    nav.main-nav a[href="#futures"] {
       color: var(--text-primary);
       font-weight: 500;
-    }
-    nav.main-nav a.active::after {
-      content: '';
-      position: absolute;
-      bottom: -2px;
-      left: 50%;
-      transform: translateX(-50%);
-      height: 2px;
-      width: 40px;
-      background: #f0b90b;
     }
 
     .sub-toggle {
@@ -147,9 +142,9 @@
       bottom: -4px;
       left: 50%;
       transform: translateX(-50%);
-      height: 2px;
       width: 20px;
-      background: #f0b90b;
+      height: 2px;
+      background: var(--highlight);
     }
 
     /* Profit feed styles */
@@ -165,15 +160,13 @@
     }
     .feed::-webkit-scrollbar { display: none; }
 
-    /* Shift all profit cards 0.16cm to the left */
     .trade-panel {
       background: var(--panel-bg);
       padding: 12px;
       border-radius: 8px;
       transition: transform 0.5s ease;
-      margin-left: -0.16cm;
+      margin-left: -0.1cm;
     }
-
     .trade-panel .header {
       display: flex;
       align-items: center;
@@ -195,6 +188,7 @@
       font-size: 14px;
       font-weight: 500;
       margin-right: 6px;
+      color: var(--text-primary);
     }
     .tag {
       background: var(--secondary-bg);
@@ -255,6 +249,7 @@
     .value {
       font-size: 14px;
       font-weight: 400;
+      color: var(--text-primary);
       transition: all 0.3s ease;
     }
     .value.green,
@@ -270,7 +265,6 @@
       font-weight: bold;
     }
 
-    /* Smaller margin ratio values */
     .margin-ratio-value {
       font-size: 12px !important;
     }
@@ -303,24 +297,27 @@
     </div>
   </div>
 
+  <!-- Main Navigation -->
   <nav class="main-nav">
     <a href="#" class="active">Overview</a>
     <a href="#">Funding</a>
-    <a href="#">Futures</a>
+    <a href="#futures">Futures</a>
     <a href="#">Spot</a>
   </nav>
 
+  <!-- Sub Toggle -->
   <div class="sub-toggle">
     <button class="active">USDⓈ-M</button>
     <button>COIN-M</button>
   </div>
 
+  <!-- Section Toggle -->
   <div class="section-toggle">
     <div class="active">Positions</div>
     <div>Assets</div>
   </div>
 
-  <!-- Profit Feed -->
+  <!-- Profit Feed Container -->
   <div class="feed"></div>
 
   <script>
@@ -383,8 +380,7 @@
 
       const markPrice = entryPrice + profitVal / sizeCoins;
       const liqPrice = entryPrice * (1 - 1 / leverage);
-      const maintRate = getMaintRate(sym);
-      const maintenanceMargin = notional * maintRate;
+      const maintenanceMargin = notional * getMaintRate(sym);
       const equity = margin + profitVal;
       const marginRatio = (maintenanceMargin / equity) * 100;
 
@@ -411,9 +407,7 @@
           <div class="column">
             <div class="stat">
               <div class="label">PNL (USDT)</div>
-              <div class="value ${profitVal < 0 ? 'red' : 'green'}">
-                ${formatWithCommas(profitVal)}
-              </div>
+              <div class="value ${profitVal < 0 ? 'red' : 'green'}">${formatWithCommas(profitVal)}</div>
             </div>
             <div class="stat">
               <div class="label">Size (USDT)</div>
@@ -437,15 +431,11 @@
           <div class="column right">
             <div class="stat">
               <div class="label">ROI</div>
-              <div class="value percent ${profitVal < 0 ? 'red' : 'green'}">
-                ${(profitVal >= 0 ? '+' : '') + rawPct.toFixed(2)}%
-              </div>
+              <div class="value percent ${profitVal < 0 ? 'red' : 'green'}">${(profitVal >= 0 ? '+' : '') + rawPct.toFixed(2)}%</div>
             </div>
             <div class="stat margin-ratio">
               <div class="label">Margin Ratio</div>
-              <div class="value percent margin-ratio-value ${marginRatio > 80 ? 'red' : 'green'}">
-                ${marginRatio.toFixed(2)}%
-              </div>
+              <div class="value percent margin-ratio-value ${marginRatio > 80 ? 'red' : 'green'}">${marginRatio.toFixed(2)}%</div>
             </div>
             <div class="stat">
               <div class="label no-line">Liq. Price (USDT)</div>
@@ -478,21 +468,24 @@
         const markPrice = t.entryPrice + profitVal / sizeCoins;
         const liqPrice = t.entryPrice * (1 - 1 / t.leverage);
         const notional = sizeCoins * t.entryPrice;
-        const maintRate = getMaintRate(t.sym);
-        const maintenanceMargin = notional * maintRate;
+        const maintenanceMargin = notional * getMaintRate(t.sym);
         const equity = t.margin + profitVal;
         const marginRatio = (maintenanceMargin / equity) * 100;
 
         vals[0].textContent = formatWithCommas(profitVal);
         vals[0].classList.toggle('green', profitVal >= 0);
         vals[0].classList.toggle('red', profitVal < 0);
+
         vals[4].textContent = markPrice.toFixed(2);
+
         roiEl.textContent = (profitVal >= 0 ? '+' : '-') + absPct.toFixed(2) + '%';
         roiEl.classList.toggle('green', profitVal >= 0);
         roiEl.classList.toggle('red', profitVal < 0);
+
         vals[6].textContent = marginRatio.toFixed(2) + '%';
         vals[6].classList.toggle('green', marginRatio < 80);
         vals[6].classList.toggle('red', marginRatio >= 80);
+
         vals[7].textContent = liqPrice.toFixed(2);
       });
     }, updateInterval);
