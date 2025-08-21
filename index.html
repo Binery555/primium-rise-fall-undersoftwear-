@@ -2,493 +2,236 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Binance Futures Positions</title>
-  <!-- Binance Plex Webfont -->
-  <link
-    href="https://db.onlinewebfonts.com/c/d05c19ccecf7003d248c60ffd6b5e8f7?family=Binance+PLEX"
-    rel="stylesheet"
-  />
-  <!-- Font Awesome -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
-  />
+  <title>Validated Payment Form</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <style>
     * { box-sizing: border-box; }
-
-    :root {
-      --panel-bg: #1e2127;
-      --secondary-bg: #32383e;
-      --btn-bg: #2f3339;
-      --text-primary: #ffffff;
-      --text-secondary: #7c828a;
-      --text-green: #3acf87;
-      --text-red: #e04b4a;
-      --highlight: #f0b90b;
-    }
-
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: var(--panel-bg);
-      color: #b0b0b0;
-      font-family: 'Binance PLEX', sans-serif;
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      max-width: 430px;
-      margin: 0 auto;
-    }
-
-    .header-wrapper {
-      display: flex;
-      justify-content: center;
-      margin-top: 12px;
-      margin-bottom: 4px;
-      background: var(--panel-bg);
-    }
-
-    .header-toggle {
-      display: flex;
-      background: var(--panel-bg);
-      border-radius: 6px;
-      overflow: hidden;
-      width: 180px;
-      height: 28px;
-    }
-    .header-toggle button {
-      flex: 1;
-      padding: 4px 6px;
-      border: none;
-      background: transparent;
-      color: var(--text-secondary);
-      font-size: 11px;
-      cursor: pointer;
-    }
-    .header-toggle .active {
-      background: var(--secondary-bg);
-      color: var(--text-primary);
-      font-weight: 500;
-    }
-
-    nav.main-nav {
-      display: flex;
-      margin: 0 12px;
-      background: var(--panel-bg);
-      padding: 4px 0;
-    }
-    nav.main-nav a {
-      margin-right: 16px;
-      text-decoration: none;
-      color: var(--text-secondary);
-      font-size: 13px;
-      padding: 8px 0;
-      position: relative;
-      white-space: nowrap;
-    }
-    nav.main-nav a.active {
-      font-weight: 500;
-      /* Overview stays secondary gray */
-    }
-    nav.main-nav a[href="#futures"] {
-      color: var(--text-primary);
-      font-weight: 500;
-    }
-
-    .sub-toggle {
-      display: flex;
-      margin: 8px 12px;
-      background: var(--panel-bg);
-      padding: 4px;
-      border-radius: 4px;
-    }
-    .sub-toggle button {
-      margin-right: 8px;
-      padding: 5px 10px;
-      background: var(--panel-bg);
-      border: none;
-      border-radius: 4px;
-      color: var(--text-secondary);
-      font-size: 12px;
-      cursor: pointer;
-    }
-    .sub-toggle .active {
-      background: var(--secondary-bg);
-      color: var(--text-primary);
-    }
-
-    .section-toggle {
-      display: flex;
-      margin: 12px;
-      background: var(--panel-bg);
-      padding: 4px;
-      border-radius: 4px;
-    }
-    .section-toggle div {
-      margin-right: 16px;
-      cursor: pointer;
-      font-size: 13px;
-      position: relative;
-      color: var(--text-secondary);
-    }
-    .section-toggle .active {
-      color: var(--text-primary);
-      font-weight: 500;
-    }
-    .section-toggle .active::after {
-      content: '';
-      position: absolute;
-      bottom: -4px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 20px;
-      height: 2px;
-      background: var(--highlight);
-    }
-
-    /* Profit feed styles */
-    .feed {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      flex: 1;
-      overflow-y: auto;
-      padding: 0 12px;
-      margin-bottom: 4px;
-      background: var(--panel-bg);
-    }
-    .feed::-webkit-scrollbar { display: none; }
-
-    .trade-panel {
-      background: var(--panel-bg);
-      padding: 12px;
-      border-radius: 8px;
-      transition: transform 0.5s ease;
-      margin-left: -0.1cm;
-    }
-    .trade-panel .header {
-      display: flex;
-      align-items: center;
-      margin-bottom: 8px;
-    }
-    .icon-buy {
-      background: var(--text-green);
-      color: #fff;
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 12px;
-      font-weight: bold;
-      margin-right: 8px;
-    }
-    .symbol {
-      font-size: 14px;
-      font-weight: 500;
-      margin-right: 6px;
-      color: var(--text-primary);
-    }
-    .tag {
-      background: var(--secondary-bg);
-      color: var(--text-secondary);
-      font-size: 10px;
-      padding: 1px 4px;
-      margin-right: 4px;
-      text-transform: uppercase;
-    }
-    .exclamations { display: flex; margin-left: 6px; }
-    .exclamations span {
-      position: relative;
-      width: 2px;
-      height: 10px;
-      background: var(--secondary-bg);
-      margin: 0 1px;
-      border-radius: 1px;
-      transition: background 0.3s ease;
-    }
-    .exclamations span::after {
-      content: '';
-      position: absolute;
-      bottom: -3px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 2px;
-      height: 2px;
-      background: inherit;
-      border-radius: 50%;
-    }
-    .exclamations span.green,
-    .exclamations span.green::after { background: var(--text-green); }
-
-    .share {
-      margin-left: auto;
-      color: var(--text-secondary);
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    .content-columns {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      margin-bottom: 8px;
-    }
-    .column { display: flex; flex-direction: column; }
-    .column.right { text-align: right; }
-    .stat { margin-bottom: 8px; }
-    .label {
-      font-size: 12px;
-      color: var(--text-secondary);
-      border-bottom: 1px dotted var(--text-secondary);
-      padding-bottom: 2px;
-      display: inline-block;
-    }
-    .label.no-line { border-bottom: none; }
-    .value {
-      font-size: 14px;
-      font-weight: 400;
-      color: var(--text-primary);
-      transition: all 0.3s ease;
-    }
-    .value.green,
-    .value.percent.green {
-      color: var(--text-green);
-      font-size: 18px;
-      font-weight: bold;
-    }
-    .value.red,
-    .value.percent.red {
-      color: var(--text-red);
-      font-size: 18px;
-      font-weight: bold;
-    }
-
-    .margin-ratio-value {
-      font-size: 12px !important;
-    }
-
-    .actions {
-      display: flex;
-      justify-content: space-between;
-    }
-    .btn {
-      flex: 1;
-      background: var(--btn-bg);
-      color: #fff;
-      border: none;
-      border-radius: 4px;
-      padding: 6px 0;
-      font-size: 12px;
-      cursor: pointer;
-      margin: 0 4px;
-      transition: background 0.3s;
-    }
-    .btn:hover { background: var(--secondary-bg); }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; padding: 20px; }
+    .page { max-width: 500px; margin: auto; background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); display: none; }
+    .page.active { display: block; }
+    .form-group { margin-bottom: 15px; position: relative; }
+    .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+    .form-group input, .form-group select { width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 6px; }
+    .btn { width: 100%; background: #f62056; color: white; padding: 14px; font-size: 18px; border: none; border-radius: 6px; cursor: pointer; }
+    .btn:hover { background-color: #dc194c; }
+    .checkbox-group { display: flex; align-items: center; gap: 10px; margin: 15px 0; }
+    .card-number-group { display: flex; gap: 10px; }
+    .card-number-group input { flex: 1; }
+    .expiry-cvv { display: flex; gap: 10px; }
+    .expiry-cvv select, .expiry-cvv input { flex: 1; }
+    .payment-method-header { display: flex; justify-content: space-between; align-items: center; background: #e6f7e6; padding: 10px 15px; border-radius: 8px; margin-bottom: 20px; border-left: 5px solid green; }
+    .card-icons img { height: 24px; margin-left: 8px; }
+    .error-text { color: red; font-size: 12px; margin-top: 4px; }
+    #error-message { color: red; font-size: 13px; text-align: center; margin-top: 10px; display: none; }
+    /* Loader styles */
+    #loader { display: none; margin: 20px auto; }
+    .spinner { display: flex; justify-content: center; gap: 8px; }
+    .spinner div { width: 12px; height: 12px; background: #f62056; border-radius: 50%; animation: bounce 0.6s infinite alternate; }
+    .spinner div:nth-child(2) { animation-delay: 0.2s; }
+    .spinner div:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce { to { transform: translateY(-100%); } }
   </style>
 </head>
 <body>
-  <!-- Centered Toggle -->
-  <div class="header-wrapper">
-    <div class="header-toggle">
-      <button class="active">Exchange</button>
-      <button>Wallet</button>
+
+<!-- Page 1 -->
+<div class="page active" id="page1">
+  <h2>Enter Amount</h2>
+  <div class="form-group">
+    <label for="usdAmount">Amount (USD)</label>
+    <input type="number" id="usdAmount" placeholder="Enter amount in USD" />
+  </div>
+  <div class="form-group">
+    <label for="currencySelect">Convert to</label>
+    <select id="currencySelect"></select>
+  </div>
+  <div class="form-group">
+    <label for="convertedAmount">Converted Amount</label>
+    <input type="text" id="convertedAmount" readonly />
+  </div>
+  <button class="btn" onclick="goToPayment()">Confirm</button>
+</div>
+
+<!-- Page 2 -->
+<div class="page" id="page2">
+  <div class="payment-method-header">
+    <div><input type="radio" checked /> Credit & Debit cards</div>
+    <div class="card-icons">
+      <img src="https://img.icons8.com/color/48/000000/visa.png" />
+      <img src="https://img.icons8.com/color/48/000000/mastercard-logo.png" />
+      <img src="https://img.icons8.com/color/48/000000/maestro.png" />
     </div>
   </div>
 
-  <!-- Main Navigation -->
-  <nav class="main-nav">
-    <a href="#" class="active">Overview</a>
-    <a href="#">Funding</a>
-    <a href="#futures">Futures</a>
-    <a href="#">Spot</a>
-  </nav>
-
-  <!-- Sub Toggle -->
-  <div class="sub-toggle">
-    <button class="active">USDⓈ-M</button>
-    <button>COIN-M</button>
+  <div class="form-group">
+    <label>You are paying:</label>
+    <input type="text" id="amountDisplay" readonly />
   </div>
 
-  <!-- Section Toggle -->
-  <div class="section-toggle">
-    <div class="active">Positions</div>
-    <div>Assets</div>
+  <div class="form-group">
+    <label>Cardholder Name</label>
+    <input type="text" id="cardName" />
+    <div class="error-text" id="errorName"></div>
   </div>
 
-  <!-- Profit Feed Container -->
-  <div class="feed"></div>
+  <div class="form-group">
+    <label>Card Number</label>
+    <div class="card-number-group">
+      <input type="text" maxlength="4" id="n1" placeholder="1234" />
+      <input type="text" maxlength="4" id="n2" placeholder="5678" />
+      <input type="text" maxlength="4" id="n3" placeholder="9012" />
+      <input type="text" maxlength="4" id="n4" placeholder="3456" />
+    </div>
+    <div class="error-text" id="errorNumber"></div>
+  </div>
 
-  <script>
-    const maintenanceMarginRates = {
-      BTCUSDT: 0.004, ETHUSDT: 0.005, BNBUSDT: 0.005, ADAUSDT: 0.01,
-      SOLUSDT: 0.008, XRPUSDT: 0.01, DOTUSDT: 0.01, LTCUSDT: 0.01,
-      LINKUSDT: 0.01, DOGEUSDT: 0.012, UNIUSDT: 0.01, BCHUSDT: 0.01,
-      XLMUSDT: 0.015, ATOMUSDT: 0.01, MATICUSDT: 0.01, AVAXUSDT: 0.01,
-      TRXUSDT: 0.02, EOSUSDT: 0.015, NEARUSDT: 0.02, FILUSDT: 0.015
-    };
-    function getMaintRate(sym) { return maintenanceMarginRates[sym] || 0.005; }
-    function formatWithCommas(x) {
-      return x.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
-    }
-    const symbols = [
-      'BTCUSDT','ETHUSDT','BNBUSDT','ADAUSDT','SOLUSDT','XRPUSDT',
-      'DOTUSDT','LTCUSDT','LINKUSDT','DOGEUSDT','UNIUSDT','BCHUSDT',
-      'XLMUSDT','ATOMUSDT','MATICUSDT','AVAXUSDT','TRXUSDT','EOSUSDT',
-      'NEARUSDT','FILUSDT'
-    ];
-    const sizeCoins = 10;
-    const allowedLeverages = [10, 15, 20, 50];
-    const minPercent = 50;
-    const maxPercent = 2300;
-    const minPnl = 50;
-    const maxPnl = 1500;
-    const updateInterval = 2000;
-    const maxDeltaPct = 1;
-    const extraTrades = 50;
+  <div class="expiry-cvv">
+    <div class="form-group">
+      <label>End Date</label>
+      <div style="display: flex; gap: 8px;">
+        <select id="monthSelect"><option>mm</option></select>
+        <select id="yearSelect"><option>yyyy</option></select>
+      </div>
+      <div class="error-text" id="errorDate"></div>
+    </div>
+    <div class="form-group">
+      <label>CVV</label>
+      <input type="text" maxlength="3" id="cvv" placeholder="3 digits" />
+      <div class="error-text" id="errorCVV"></div>
+    </div>
+  </div>
 
-    function pickLosers(count, total) {
-      const losers = [];
-      while (losers.length < count) {
-        const idx = Math.floor(Math.random() * total);
-        if ([idx, idx-1, idx+1].some(x => losers.includes(x))) continue;
-        losers.push(idx);
+  <div class="checkbox-group">
+    <input type="checkbox" id="terms" />
+    <label>I accept the terms of use, rules of flight and privacy policy</label>
+  </div>
+  <div class="error-text" id="errorTerms"></div>
+
+  <button class="btn" onclick="declinePayment()">Pay Now »</button>
+  <div id="loader">
+    <div class="spinner">
+      <div></div><div></div><div></div>
+    </div>
+  </div>
+  <div id="error-message"></div>
+</div>
+
+<script>
+  let rates = {};
+  const usdInput = document.getElementById("usdAmount");
+  const currencySelect = document.getElementById("currencySelect");
+  const convertedAmount = document.getElementById("convertedAmount");
+  const amountDisplay = document.getElementById("amountDisplay");
+  const loader = document.getElementById('loader');
+  const errorMsg = document.getElementById('error-message');
+
+  fetch("https://api.exchangerate-api.com/v4/latest/USD")
+    .then(res => res.json())
+    .then(data => {
+      rates = data.rates;
+      for (const currency in rates) {
+        const option = document.createElement("option");
+        option.value = currency;
+        option.textContent = currency;
+        currencySelect.appendChild(option);
       }
-      return losers;
+      currencySelect.value = "LKR";
+    });
+
+  usdInput.addEventListener("input", updateConversion);
+  currencySelect.addEventListener("change", updateConversion);
+
+  function updateConversion() {
+    const usd = parseFloat(usdInput.value);
+    const currency = currencySelect.value;
+    if (usd > 0 && rates[currency]) {
+      const converted = (usd * rates[currency]).toFixed(2);
+      convertedAmount.value = `${converted} ${currency}`;
+    } else {
+      convertedAmount.value = "";
+    }
+  }
+
+  function goToPayment() {
+    const usd = parseFloat(usdInput.value);
+    const currency = currencySelect.value;
+    if (!usd || usd <= 0 || !currency) {
+      alert("Enter a valid amount and currency.");
+      return;
+    }
+    const converted = (usd * rates[currency]).toFixed(2);
+    amountDisplay.value = `USD ${usd.toFixed(2)} ≈ ${converted} ${currency}`;
+    document.getElementById("page1").classList.remove("active");
+    document.getElementById("page2").classList.add("active");
+  }
+
+  // Populate months and years
+  const monthSelect = document.getElementById("monthSelect");
+  const yearSelect = document.getElementById("yearSelect");
+  for (let i = 1; i <= 12; i++) {
+    monthSelect.innerHTML += `<option value="${i}">${i}</option>`;
+  }
+  for (let y = 2022; y <= 2028; y++) {
+    yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
+  }
+
+  function declinePayment() {
+    let valid = true;
+    errorMsg.style.display = 'none';
+    // Clear old errors
+    ["errorName", "errorNumber", "errorDate", "errorCVV", "errorTerms"].forEach(id => {
+      document.getElementById(id).textContent = "";
+    });
+
+    const name = document.getElementById("cardName").value.trim();
+    if (!name) {
+      document.getElementById("errorName").textContent = "Cardholder name is required.";
+      valid = false;
     }
 
-    const totalCount = symbols.length + extraTrades;
-    const loseIdxs = pickLosers(2 + Math.floor(Math.random() * 2), totalCount);
-    const trades = [];
-    const feedDiv = document.querySelector('.feed');
-
-    while (trades.length < totalCount) {
-      const i = trades.length;
-      const sym = symbols[i % symbols.length];
-      const isLoss = loseIdxs.includes(i);
-
-      let entryPrice, notional, leverage, margin, rawPct, profitVal;
-      do {
-        entryPrice = 100 + Math.random() * 24900;
-        notional = sizeCoins * entryPrice;
-        leverage = allowedLeverages[Math.floor(Math.random() * allowedLeverages.length)];
-        margin = notional / leverage;
-        rawPct = Math.random() * (maxPercent - minPercent) + minPercent;
-        profitVal = margin * rawPct / 100 * (isLoss ? -1 : 1);
-      } while (Math.abs(profitVal) < minPnl || Math.abs(profitVal) > maxPnl);
-
-      const markPrice = entryPrice + profitVal / sizeCoins;
-      const liqPrice = entryPrice * (1 - 1 / leverage);
-      const maintenanceMargin = notional * getMaintRate(sym);
-      const equity = margin + profitVal;
-      const marginRatio = (maintenanceMargin / equity) * 100;
-
-      const panel = document.createElement('div');
-      panel.className = 'trade-panel';
-      panel.innerHTML = `
-        <div class="header">
-          <span class="icon-buy">B</span>
-          <span class="symbol">${sym}</span>
-          <span class="tag">PERP</span>
-          <span class="tag">Cross ${leverage}×</span>
-          <span class="exclamations">${(() => {
-            let html = '';
-            const adlTotal = 4;
-            const adlGreenCount = Math.floor(Math.random() * adlTotal) + 1;
-            for (let j = 0; j < adlTotal; j++) {
-              html += `<span class="${j < adlGreenCount ? 'green' : ''}"></span>`;
-            }
-            return html;
-          })()}</span>
-          <i class="fas fa-share-alt share"></i>
-        </div>
-        <div class="content-columns">
-          <div class="column">
-            <div class="stat">
-              <div class="label">PNL (USDT)</div>
-              <div class="value ${profitVal < 0 ? 'red' : 'green'}">${formatWithCommas(profitVal)}</div>
-            </div>
-            <div class="stat">
-              <div class="label">Size (USDT)</div>
-              <div class="value">${notional.toFixed(2)}</div>
-            </div>
-            <div class="stat">
-              <div class="label">Entry Price (USDT)</div>
-              <div class="value">${entryPrice.toFixed(2)}</div>
-            </div>
-          </div>
-          <div class="column center">
-            <div class="stat">
-              <div class="label no-line">Margin (USDT)</div>
-              <div class="value">${margin.toFixed(2)}</div>
-            </div>
-            <div class="stat">
-              <div class="label no-line">Mark Price (USDT)</div>
-              <div class="value">${markPrice.toFixed(2)}</div>
-            </div>
-          </div>
-          <div class="column right">
-            <div class="stat">
-              <div class="label">ROI</div>
-              <div class="value percent ${profitVal < 0 ? 'red' : 'green'}">${(profitVal >= 0 ? '+' : '') + rawPct.toFixed(2)}%</div>
-            </div>
-            <div class="stat margin-ratio">
-              <div class="label">Margin Ratio</div>
-              <div class="value percent margin-ratio-value ${marginRatio > 80 ? 'red' : 'green'}">${marginRatio.toFixed(2)}%</div>
-            </div>
-            <div class="stat">
-              <div class="label no-line">Liq. Price (USDT)</div>
-              <div class="value">${liqPrice.toFixed(2)}</div>
-            </div>
-          </div>
-        </div>
-        <div class="actions">
-          <button class="btn">Leverage</button>
-          <button class="btn">TP/SL</button>
-          <button class="btn">Close</button>
-          <button class="btn">Reverse</button>
-        </div>
-      `;
-      feedDiv.appendChild(panel);
-      trades.push({ panel, entryPrice, margin, leverage, sym });
+    const nums = ["n1", "n2", "n3", "n4"].map(id => document.getElementById(id).value);
+    if (nums.some(n => !/^\d{4}$/.test(n))) {
+      document.getElementById("errorNumber").textContent = "Enter all 4-digit card number fields.";
+      valid = false;
     }
 
-    setInterval(() => {
-      trades.forEach(t => {
-        const vals = t.panel.querySelectorAll('.value');
-        const roiEl = t.panel.querySelector('.value.percent');
-        let currentPct = parseFloat(roiEl.textContent);
-        const sign = currentPct >= 0 ? 1 : -1;
-        let absPct = Math.abs(currentPct);
-        absPct += (Math.random() * 2 - 1) * maxDeltaPct;
-        absPct = Math.max(minPercent, Math.min(maxPercent, absPct));
-        let profitVal = t.margin * absPct / 100 * sign;
-        profitVal = sign * Math.min(maxPnl, Math.max(minPnl, Math.abs(profitVal)));
-        const markPrice = t.entryPrice + profitVal / sizeCoins;
-        const liqPrice = t.entryPrice * (1 - 1 / t.leverage);
-        const notional = sizeCoins * t.entryPrice;
-        const maintenanceMargin = notional * getMaintRate(t.sym);
-        const equity = t.margin + profitVal;
-        const marginRatio = (maintenanceMargin / equity) * 100;
+    const month = monthSelect.value;
+    const year = yearSelect.value;
+    if (month === "mm" || year === "yyyy") {
+      document.getElementById("errorDate").textContent = "Select a valid expiry date.";
+      valid = false;
+    }
 
-        vals[0].textContent = formatWithCommas(profitVal);
-        vals[0].classList.toggle('green', profitVal >= 0);
-        vals[0].classList.toggle('red', profitVal < 0);
+    const cvv = document.getElementById("cvv").value;
+    if (!/^\d{3}$/.test(cvv)) {
+      document.getElementById("errorCVV").textContent = "Enter a valid 3-digit CVV.";
+      valid = false;
+    }
 
-        vals[4].textContent = markPrice.toFixed(2);
+    const termsAccepted = document.getElementById("terms").checked;
+    if (!termsAccepted) {
+      document.getElementById("errorTerms").textContent = "You must accept the terms.";
+      valid = false;
+    }
 
-        roiEl.textContent = (profitVal >= 0 ? '+' : '-') + absPct.toFixed(2) + '%';
-        roiEl.classList.toggle('green', profitVal >= 0);
-        roiEl.classList.toggle('red', profitVal < 0);
+    // Show loader and error if form is valid
+    if (valid) {
+      loader.style.display = 'block';
+      const errors = [
+        '❌ Your card was declined.',
+        '⚠️ Payment could not be processed.',
+        '❗ Transaction failed. Please try another card.'
+      ];
+      const delay = Math.random() * 1500 + 1000; // 1-2.5s
+      setTimeout(() => {
+        loader.style.display = 'none';
+        const randomError = errors[Math.floor(Math.random() * errors.length)];
+        errorMsg.textContent = randomError;
+        errorMsg.style.display = 'block';
+      }, delay);
+    }
+  }
+</script>
 
-        vals[6].textContent = marginRatio.toFixed(2) + '%';
-        vals[6].classList.toggle('green', marginRatio < 80);
-        vals[6].classList.toggle('red', marginRatio >= 80);
-
-        vals[7].textContent = liqPrice.toFixed(2);
-      });
-    }, updateInterval);
-  </script>
 </body>
 </html>
